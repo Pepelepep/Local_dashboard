@@ -1,0 +1,22 @@
+# Fichiers secrets à ne jamais versionner
+config.env
+gspread_key.json
+.streamlit/secrets.toml
+
+# Fichiers temporaires Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Données
+*.csv
+
+# Environnement virtuel
+.venv/
+
+# Fichiers spécifiques à PyCharm
+.idea/
+*.iml
+
+# Divers
+.DS_Store
