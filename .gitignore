@@ -1,5 +1,6 @@
 # Fichiers secrets à ne jamais versionner
 config.env
+conf.env
 gspread_key.json
 .streamlit/secrets.toml
 .secrets
@@ -26,3 +27,4 @@ __pycache__/
 # Divers
 .DS_Store
 .env
+conf.env
