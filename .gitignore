@@ -2,6 +2,8 @@
 config.env
 gspread_key.json
 .streamlit/secrets.toml
+.secrets
+/.streamlit/secrets.toml
 
 # Fichiers temporaires Python
 __pycache__/
@@ -13,6 +15,9 @@ __pycache__/
 
 # Environnement virtuel
 .venv/
+.env/
+.env
+*.env
 
 # Fichiers spécifiques à PyCharm
 .idea/

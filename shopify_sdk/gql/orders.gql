@@ -1,0 +1,47 @@
+query ($cursor: String) {
+  orders(first: 100, after: $cursor) {
+    pageInfo {
+      hasNextPage
+    }
+    edges {
+      cursor
+      node {
+        id
+        name
+        createdAt
+        email
+        tags
+        displayFinancialStatus
+        displayFulfillmentStatus
+        lineItems(first: 100) {
+          pageInfo {
+            hasNextPage
+          }
+          edges {
+            cursor
+            node {
+              id
+              title
+              sku
+              vendor
+              quantity
+              originalUnitPriceSet {
+                shopMoney {
+                  amount
+                  currencyCode
+                }
+              }
+              discountedUnitPriceSet {
+                shopMoney {
+                  amount
+                  currencyCode
+                }
+              }
+              unfulfilledQuantity
+            }
+          }
+        }
+      }
+    }
+  }
+}

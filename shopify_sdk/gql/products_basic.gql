@@ -1,0 +1,24 @@
+query getAllProducts($cursor: String) {
+  products(first: 100, after: $cursor) {
+    pageInfo {
+      hasNextPage
+    }
+    edges {
+      cursor
+      node {
+        id
+        title
+        vendor
+        productType
+        variants(first: 100) {
+          edges {
+            node {
+              id
+              sku
+            }
+          }
+        }
+      }
+    }
+  }
+}
