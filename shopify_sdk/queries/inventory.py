@@ -31,6 +31,10 @@ def fetch_inventory_levels_df(config):
                 variant = v_edge["node"]
                 item = variant.get("inventoryItem", {})
                 inventory_levels = item.get("inventoryLevels", {}).get("edges", [])
+                size_option = next(
+                    (opt["value"] for opt in variant.get("selectedOptions", []) if opt["name"] == "Size"),
+                    None
+                )
 
                 for level in inventory_levels:
                     node = level["node"]
@@ -43,6 +47,7 @@ def fetch_inventory_levels_df(config):
                         "product_title": product["title"],
                         "variant_id": variant["id"],
                         "variant_sku": variant.get("sku"),
+                        "variant_size": size_option,
                         "inventory_item_id": item.get("id"),
                         "inventory_sku": item.get("sku"),
                         "tracked": item.get("tracked"),

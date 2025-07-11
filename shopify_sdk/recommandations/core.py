@@ -1,14 +1,21 @@
 import pandas as pd
-import pandas as pd
-
-import pandas as pd
 
 def compute_recommendations(products_df, stock_df, orders_df, vendors_df):
     vendors_df = vendors_df.rename(columns={"Supplier": "vendor"}) if "Supplier" in vendors_df.columns else vendors_df
 
-    df = stock_df.merge(products_df[["sku", "title", "vendor"]], left_on="variant_sku", right_on="sku", how="left")
+    # --- Ajout du champ variant_size depuis stock_df
+    df = stock_df.merge(
+        products_df[["sku", "title", "vendor"]],
+        left_on="variant_sku", right_on="sku", how="left"
+    )
+
     df = df.merge(vendors_df, on="vendor", how="left")
 
+    # --- Ajout du champ taille (optionnel pour clarté visuelle)
+    if "variant_size" in stock_df.columns:
+        df["variant_size"] = stock_df["variant_size"]
+
+    # --- Calcul des ventes moyennes
     orders_df["created_at"] = pd.to_datetime(orders_df["created_at"], utc=True)
     now = pd.Timestamp.now(tz="UTC")
 

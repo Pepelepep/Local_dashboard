@@ -11,6 +11,10 @@ query getInventoryLevels($cursor: String) {
             node {
               id
               sku
+              selectedOptions {
+                  name
+                  value
+              }
               inventoryItem {
                 id
                 sku

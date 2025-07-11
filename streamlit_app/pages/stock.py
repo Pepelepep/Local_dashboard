@@ -68,3 +68,28 @@ def render():
         use_container_width=True,
         height=600
     )
+
+    # --- Détail par SKU sous le seuil
+    st.subheader("🧾 Détail des variantes sous le seuil")
+
+    df_detail = df[df["available_quantity"] <= seuil].copy()
+
+    df_detail = df_detail[[
+        "location_name", "product_title", "variant_sku", "variant_size", "available_quantity",
+          "Lien Shopify"
+    ]].rename(columns={
+        "location_name": "Lieu",
+        "product_title": "Produit",
+        "variant_sku": "SKU",
+        "variant_size": "Taille",
+        "available_quantity": "Stock",
+        "Lien Shopify": "Lien Shopify"
+    })
+
+    df_detail = df_detail.sort_values(by="Stock")
+
+    st.dataframe(
+        df_detail,
+        use_container_width=True,
+        height=500
+    )
