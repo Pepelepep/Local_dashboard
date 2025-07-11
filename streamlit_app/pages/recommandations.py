@@ -14,6 +14,9 @@ def render():
 
     df = compute_recommendations(products_df, stock_df, orders_df, vendors_df)
 
+    # --- Calcul de la quantité à commander
+    df["Quantité à commander"] = ((df["mean_sales"] * df["Delivery_Days"]) - df["available_quantity"]).round().clip(lower=0).astype(int)
+
     # --- Filtres en haut
     col1, col2, col3 = st.columns(3)
 
@@ -31,15 +34,13 @@ def render():
         selected_vendors = st.multiselect("🏷️ Marques", options=vendors, default=list(vendors))
         df = df[df["vendor"].isin(selected_vendors)]
 
-    # --- Filtre ventes récentes avec sélecteur et valeur par défaut
-    # --- Filtres en haut
-    col4, col5,= st.columns(2)
+    col4, col5 = st.columns(2)
 
     with col4:
         vente_filter = st.selectbox(
             "📦 Produits à inclure",
             options=["Tous", "Avec ventes récentes", "Sans ventes récentes"],
-            index=1  # Présélection sur "Avec ventes récentes"
+            index=1
         )
         if vente_filter == "Avec ventes récentes":
             df = df[df["Ventes récentes"]]
@@ -48,38 +49,44 @@ def render():
 
     with col5:
         recommander_filter = st.selectbox(
-            "☑️ A recommander ?",
+            "☑️ À recommander ?",
             options=["Oui", "Non"],
-            index=0  # Présélection sur "Avec ventes récentes"
+            index=0
         )
         if recommander_filter == "Oui":
             df = df[df["À recommander"]]
         elif recommander_filter == "Non":
             df = df[~df["À recommander"]]
-        
 
     # --- Tableau final
-    st.subheader("📋 Produits recommandés à prioriser")
+    st.subheader("📋 Variantes recommandées à commander")
 
     display_df = df[[
-        "🟡", "vendor", "title","variant_sku",  "location_name",
-        "available_quantity", "avg_sales_7d", "avg_sales_14d", "avg_sales_30d",
-        "mean_sales", "days_to_oos", "Delivery_Days", "Score Importance", "À recommander"
+        "🟡", "vendor", "title", "variant_size", "variant_sku", "location_name",
+        "available_quantity", "avg_sales_30d", "mean_sales", "Delivery_Days",
+        "Quantité à commander", "days_to_oos", "Score Importance"
     ]].rename(columns={
         "🟡": "Alerte",
         "vendor": "Marque",
         "title": "Produit",
+        "variant_size": "Taille",
         "variant_sku": "SKU",
         "location_name": "Lieu",
         "available_quantity": "Stock actuel",
-        "avg_sales_7d": "Ventes 7j",
-        "avg_sales_14d": "Ventes 14j",
-        "avg_sales_30d": "Ventes 30j",
-        "mean_sales": "Ventes moy.",
-        "days_to_oos": "Jours avant rupture",
-        "Delivery_Days": "Délai fournisseur"
+        "avg_sales_30d": "Ventes moy. 30j",
+        "mean_sales": "Ventes moy/j",
+        "Delivery_Days": "Délai fournisseur",
+        "days_to_oos": "Jours avant rupture"
     })
 
     display_df = display_df.sort_values("Score Importance", ascending=False)
 
     st.dataframe(display_df, use_container_width=True, height=600)
+
+    # --- Export CSV
+    st.download_button(
+        "⬇️ Exporter en CSV",
+        data=display_df.to_csv(index=False).encode("utf-8"),
+        file_name="recommandations_achat.csv",
+        mime="text/csv"
+    )
