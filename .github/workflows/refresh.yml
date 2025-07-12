@@ -42,4 +42,4 @@ jobs:
           echo "✅ Secrets written to .streamlit/secrets.toml"
 
       - name: 🚀 Run Shopify data refresh
-        run: python refresh_data.py
+        run: python shopify_sdk/db/refresh_data.py
