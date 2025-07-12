@@ -32,7 +32,7 @@ jobs:
           mkdir -p .streamlit
           echo "SHOP_NAME_TEC = '${{ secrets.SHOP_NAME_TEC }}'" > .streamlit/secrets.toml
           echo "SHOP = '${{ secrets.SHOP }}'" >> .streamlit/secrets.toml
-          echo "SHOPIFY_TOKEN = '${{ secrets.SHOPIFY_TOKEN }}'" >> .streamlit/secrets.toml
+          echo "SHOPIFY_API_TOKEN = '${{ secrets.SHOPIFY_API_TOKEN }}'" >> .streamlit/secrets.toml
 
       - name: 🚀 Run refresh script
         run: python shopify_sdk/db/refresh_data.py
