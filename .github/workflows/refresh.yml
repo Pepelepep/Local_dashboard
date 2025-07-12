@@ -2,19 +2,13 @@ name: 🚀 Refresh Shopify Data Daily
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # ⏰ Tous les jours à 2h UTC
-  workflow_dispatch:      # Permet aussi de le lancer à la main
+    - cron: '0 4 * * *'  # Tous les jours à 2h UTC
+  workflow_dispatch:
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    environment: tesst  # 🔐 Associe ce job à l’environnement 'test' (où les secrets sont stockés)
-
-    env:  # 🧪 Récupère les secrets pour les rendre accessibles au job
-      SHOP: ${{ secrets.SHOP }}
-      SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
-      SHOP_NAME_TEC: ${{ secrets.SHOP_NAME_TEC }}
-
+    environment: test  # <- C’est ici que tu dois mettre tes SECRETS GitHub dans l’environnement 'test'
 
     steps:
       - name: 📥 Clone repo
@@ -24,12 +18,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-
-      - name: 💾 Cache pip
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
 
       - name: 📦 Install dependencies
         run: |
@@ -42,10 +30,9 @@ jobs:
       - name: 🔐 Inject secrets into Streamlit
         run: |
           mkdir -p .streamlit
-          echo "SHOP = '${SHOP}'" >> .streamlit/secrets.toml
-          echo "SHOPIFY_TOKEN = '${SHOPIFY_TOKEN}'" >> .streamlit/secrets.toml
-          echo "SHOP_NAME_TEC = '${SHOP_NAME_TEC}'" >> .streamlit/secrets.toml
+          echo "SHOP_NAME_TEC = '${{ secrets.SHOP_NAME_TEC }}'" > .streamlit/secrets.toml
+          echo "SHOP = '${{ secrets.SHOP }}'" >> .streamlit/secrets.toml
+          echo "SHOPIFY_TOKEN = '${{ secrets.SHOPIFY_TOKEN }}'" >> .streamlit/secrets.toml
 
-
-      - name: 🚀 Run Shopify data refresh
+      - name: 🚀 Run refresh script
         run: python shopify_sdk/db/refresh_data.py
