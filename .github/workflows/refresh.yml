@@ -36,6 +36,7 @@ jobs:
         env:
           SHOP: ${{ secrets.SHOP }}
           SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
+          SHOP_NAME_TEC: ${{ secrets.SHOP_NAME_TEC }}
         run: |
           mkdir -p .streamlit
           echo "[shopify]" > .streamlit/secrets.toml
