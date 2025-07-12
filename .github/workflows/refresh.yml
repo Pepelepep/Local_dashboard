@@ -2,36 +2,44 @@ name: 🚀 Refresh Shopify Data Daily
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # ⏰ Tous les jours à 2h UTC
-  workflow_dispatch:      # Permet aussi de le lancer à la main
+    - cron: '0 2 * * *'  # ⏰ Tous les jours à 2h UTC (4h Paris)
+  workflow_dispatch:      # ⚙️ Permet de le déclencher manuellement
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Clone repo
-        uses: actions/checkout@v3
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
+      - name: 🐍 Setup Python 3.11
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: '3.11'
 
-      - name: 📦 Install dependencies
+      - name: 💾 Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: 📦 Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 🔐 Inject secrets
+      - name: 🔐 Inject secrets into Streamlit config
         env:
           SHOP: ${{ secrets.SHOP }}
           SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
         run: |
+          set -e
           mkdir -p .streamlit
           echo "[shopify]" > .streamlit/secrets.toml
           echo "SHOP = '${SHOP}'" >> .streamlit/secrets.toml
           echo "SHOPIFY_TOKEN = '${SHOPIFY_TOKEN}'" >> .streamlit/secrets.toml
+          echo "✅ Secrets written to .streamlit/secrets.toml"
 
-      - name: 🚀 Run refresh script
+      - name: 🚀 Run Shopify data refresh
         run: python refresh_data.py
