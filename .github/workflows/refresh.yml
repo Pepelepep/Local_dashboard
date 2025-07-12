@@ -41,6 +41,7 @@ jobs:
           echo "[shopify]" > .streamlit/secrets.toml
           echo "SHOP = '${SHOP}'" >> .streamlit/secrets.toml
           echo "SHOPIFY_TOKEN = '${SHOPIFY_TOKEN}'" >> .streamlit/secrets.toml
-
+          echo "SHOP_NAME_TEC = '${SHOP_NAME_TEC}'" >> .streamlit/secrets.toml
+          
       - name: 🚀 Run Shopify data refresh
         run: python shopify_sdk/db/refresh_data.py
