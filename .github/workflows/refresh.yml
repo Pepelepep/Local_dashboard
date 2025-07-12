@@ -8,6 +8,13 @@ on:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    environment: tesst  # 🔐 Associe ce job à l’environnement 'test' (où les secrets sont stockés)
+
+    env:  # 🧪 Récupère les secrets pour les rendre accessibles au job
+      SHOP: ${{ secrets.SHOP }}
+      SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
+      SHOP_NAME_TEC: ${{ secrets.SHOP_NAME_TEC }}
+
 
     steps:
       - name: 📥 Clone repo
@@ -23,7 +30,7 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          
+
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -32,17 +39,13 @@ jobs:
       - name: ⚙️ Set PYTHONPATH
         run: echo "PYTHONPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
 
-      - name: 🔐 Inject secrets
-        env:
-          SHOP: ${{ secrets.SHOP }}
-          SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
-          SHOP_NAME_TEC: ${{ secrets.SHOP_NAME_TEC }}
+      - name: 🔐 Inject secrets into Streamlit
         run: |
           mkdir -p .streamlit
-          echo "[shopify]" > .streamlit/secrets.toml
           echo "SHOP = '${SHOP}'" >> .streamlit/secrets.toml
           echo "SHOPIFY_TOKEN = '${SHOPIFY_TOKEN}'" >> .streamlit/secrets.toml
           echo "SHOP_NAME_TEC = '${SHOP_NAME_TEC}'" >> .streamlit/secrets.toml
-          
+
+
       - name: 🚀 Run Shopify data refresh
         run: python shopify_sdk/db/refresh_data.py
