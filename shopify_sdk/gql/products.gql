@@ -11,7 +11,6 @@ query getProductsAndVariants($cursor: String) {
         vendor
         productType
         updatedAt
-        tags
         variants(first: 100) {
           edges {
             node {
@@ -23,24 +22,6 @@ query getProductsAndVariants($cursor: String) {
               selectedOptions {
                 name
                 value
-              }
-              inventoryItem {
-                id
-                tracked
-                inventoryLevels(first: 5) {
-                  edges {
-                    node {
-                      quantities(names: ["available"]) {
-                        name
-                        quantity
-                        updatedAt
-                      }
-                      location {
-                        name
-                      }
-                    }
-                  }
-                }
               }
             }
           }

@@ -1,4 +1,4 @@
-query ($cursor: String) {
+query getOrders($cursor: String) {
   orders(first: 100, after: $cursor) {
     pageInfo {
       hasNextPage
@@ -6,38 +6,30 @@ query ($cursor: String) {
     edges {
       cursor
       node {
-        id
         name
+        id
         createdAt
-        email
-        tags
         displayFinancialStatus
-        displayFulfillmentStatus
-        lineItems(first: 100) {
-          pageInfo {
-            hasNextPage
+        fulfillments(first: 5) {
+          location {
+            id
+            name
           }
+        }
+        lineItems(first: 100) {
           edges {
-            cursor
             node {
               id
-              title
-              sku
-              vendor
               quantity
-              originalUnitPriceSet {
-                shopMoney {
-                  amount
-                  currencyCode
-                }
+              variant {
+                id
+                sku
               }
               discountedUnitPriceSet {
                 shopMoney {
                   amount
-                  currencyCode
                 }
               }
-              unfulfilledQuantity
             }
           }
         }

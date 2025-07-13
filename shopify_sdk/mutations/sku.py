@@ -53,6 +53,11 @@ def process_all_products():
             product = edge["node"]
             for v_edge in product["variants"]["edges"]:
                 variant = v_edge["node"]
+
+                if variant.get("sku"):
+                    print(f"⏩ {variant['id']} a déjà un SKU : {variant['sku']} → skip")
+                    continue
+
                 new_sku = generate_sku(product, variant)
                 update_sku_on_shopify(client, variant["id"], new_sku)
                 time.sleep(0.5)  # évite throttling Shopify

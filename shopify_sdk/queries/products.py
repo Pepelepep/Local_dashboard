@@ -21,38 +21,32 @@ def fetch_products_variants_df(config):
                 continue
             else:
                 raise e
-        
+
         products = result["products"]
         for edge in products["edges"]:
             cursor = edge["cursor"]
             product = edge["node"]
             for v_edge in product["variants"]["edges"]:
                 variant = v_edge["node"]
-                inventory_item = variant.get("inventoryItem", {})
-                inventory_levels = inventory_item.get("inventoryLevels", {}).get("edges", [])
-                for level in inventory_levels:
-                    node = level["node"]
-                    quantities = node.get("quantities", [])
-                    available_qty = next((q["quantity"] for q in quantities if q["name"] == "available"), None)
-                    updated_at_qty = next((q["updatedAt"] for q in quantities if q["name"] == "available"), None)
-        
-                    rows.append({
-                        "product_id": product["id"],
-                        "title": product["title"],
-                        "vendor": product["vendor"],
-                        "product_type": product["productType"],
-                        "tags": ", ".join(product.get("tags", [])),
-                        "product_updated_at": product.get("updatedAt"),
-                        "variant_id": variant["id"],
-                        "variant_title": variant["title"],
-                        "sku": variant.get("sku"),
-                        "price": variant.get("price"),
-                        "variant_updated_at": variant.get("updatedAt"),
-                        "inventory_item_id": inventory_item.get("id"),
-                        "location": node["location"]["name"],
-                        "available_quantity": available_qty,
-                        "updatedAt": updated_at_qty
-                    })
+
+                size_option = next(
+                    (opt["value"] for opt in variant.get("selectedOptions", []) if opt["name"] == "Taille"),
+                    None
+                )
+
+                rows.append({
+                    "product_id": product["id"],
+                    "product_title": product["title"],
+                    "product_type": product.get("productType"),
+                    "vendor": product.get("vendor"),
+                    "product_updated_at": product.get("updatedAt"),
+                    "variant_id": variant["id"],
+                    "variant_title": variant.get("title"),
+                    "sku": variant.get("sku"),
+                    "price": variant.get("price"),
+                    "variant_updated_at": variant.get("updatedAt"),
+                    "size": size_option
+                })
 
         has_next = products["pageInfo"]["hasNextPage"]
 

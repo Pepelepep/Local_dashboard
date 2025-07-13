@@ -17,7 +17,7 @@ def main():
     orders_df = fetch_orders_line_items_df(config)
     print(orders_df.head())
     print(f"✔ {len(orders_df)} line items loaded.\n")
-    
+    # 
     # print("\n✅ Testing INVENTORY...")
     # inventory_df = fetch_inventory_levels_df(config)
     # print(inventory_df.head())
