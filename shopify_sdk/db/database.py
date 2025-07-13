@@ -1,13 +1,33 @@
 import os
 import pandas as pd
 from sqlalchemy import create_engine, text
-from dotenv import load_dotenv
 
-load_dotenv()
+def get_db_config():
+    """
+    Charge la config depuis les variables d'environnement OU les secrets Streamlit.
+    (Compatible Github Actions et local)
+    """
+    # On essaye d'abord les env Github Actions
+    config = {
+        "user": os.getenv("USER") or os.getenv("user"),
+        "password": os.getenv("PASSWORD") or os.getenv("password"),
+        "host": os.getenv("HOST") or os.getenv("host"),
+        "port": os.getenv("PORT") or os.getenv("port"),
+        "database": os.getenv("DATABASE") or os.getenv("database"),
+    }
+    # (optionnel) tu peux ajouter un fallback Streamlit ici si tu veux compatibilité locale
+    # import streamlit as st
+    # for k in config:
+    #     if not config[k] and k in st.secrets:
+    #         config[k] = st.secrets[k]
+    return config
 
 def get_engine():
+    cfg = get_db_config()
+    # ⚠️ On force la conversion de port
+    port = int(cfg["port"]) if cfg["port"] is not None else 5432
     return create_engine(
-        f"postgresql://{os.getenv('user')}:{os.getenv('password')}@{os.getenv('host')}:{os.getenv('port')}/{os.getenv('database')}"
+        f"postgresql://{cfg['user']}:{cfg['password']}@{cfg['host']}:{port}/{cfg['database']}"
     )
 
 def upsert_table(df: pd.DataFrame, table_name: str):
