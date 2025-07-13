@@ -16,7 +16,7 @@ def get_shop_credentials():
     """
     if STREAMLIT_MODE:
         return {
-            "SHOP_NAME": st.secrets["SHOP],
+            "SHOP_NAME": st.secrets["SHOP"],
             "ACCESS_TOKEN": st.secrets["SHOPIFY_API_TOKEN"]
         }
     else:

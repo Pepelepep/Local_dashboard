@@ -29,7 +29,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Génère le fichier .streamlit/secrets.toml pour le script Python
+      # Si ton script a besoin de secrets, crée le fichier de secrets attendu
       - name: 🔐 Inject secrets
         env:
           SHOP: ${{ secrets.SHOP }}
@@ -38,6 +38,7 @@ jobs:
           mkdir -p .streamlit
           echo "SHOP = '${SHOP}'" > .streamlit/secrets.toml
           echo "SHOPIFY_API_TOKEN = '${SHOPIFY_API_TOKEN}'" >> .streamlit/secrets.toml
+
 
       - name: 🚀 Run refresh script
         run: python shopify_sdk/db/refresh_data.py
