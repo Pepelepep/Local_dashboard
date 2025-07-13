@@ -16,11 +16,11 @@ def get_shop_credentials():
     """
     if STREAMLIT_MODE:
         return {
-            "SHOP_NAME": st.secrets["SHOP"],
+            "SHOP_NAME": st.secrets["SHOP_NAME_TEC"],
             "ACCESS_TOKEN": st.secrets["SHOPIFY_API_TOKEN"]
         }
     else:
         return {
-            "SHOP_NAME": os.getenv("SHOP"),
+            "SHOP_NAME": os.getenv("SHOP_NAME_TEC"),
             "ACCESS_TOKEN": os.getenv("SHOPIFY_API_TOKEN")
         }

@@ -35,11 +35,11 @@ jobs:
       # Si ton script a besoin de secrets, crée le fichier de secrets attendu
       - name: 🔐 Inject secrets
         env:
-          SHOP: ${{ secrets.SHOP }}
+          SHOP_NAME_TEC: ${{ secrets.SHOP_NAME_TEC }}
           SHOPIFY_API_TOKEN: ${{ secrets.SHOPIFY_API_TOKEN }}
         run: |
           mkdir -p .streamlit
-          echo "SHOP = '${SHOP}'" > .streamlit/secrets.toml
+          echo "SHOP_NAME_TEC = '${SHOP_NAME_TEC}'" > .streamlit/secrets.toml
           echo "SHOPIFY_API_TOKEN = '${SHOPIFY_API_TOKEN}'" >> .streamlit/secrets.toml
 
 
