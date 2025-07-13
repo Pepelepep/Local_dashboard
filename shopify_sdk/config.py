@@ -1,26 +1,20 @@
 import os
-
-# Détection si on tourne dans Streamlit
 try:
     import streamlit as st
-    STREAMLIT_MODE = True
 except ImportError:
-    from dotenv import load_dotenv
-    load_dotenv()
-    STREAMLIT_MODE = False
+    st = None
 
 def get_shop_credentials():
-    """
-    Récupère les credentials Shopify du client unique (version simple).
-    Compatible Streamlit ou .env
-    """
-    if STREAMLIT_MODE:
-        return {
-            "SHOP_NAME": st.secrets["SHOP_NAME_TEC"],
-            "ACCESS_TOKEN": st.secrets["SHOPIFY_API_TOKEN"]
-        }
+    if st is not None and hasattr(st, "secrets"):
+        shop_name = st.secrets.get("SHOP_NAME_TEC")
+        access_token = st.secrets.get("SHOPIFY_API_TOKEN")
     else:
-        return {
-            "SHOP_NAME": os.getenv("SHOP_NAME_TEC"),
-            "ACCESS_TOKEN": os.getenv("SHOPIFY_API_TOKEN")
-        }
+        shop_name = os.getenv("SHOP_NAME_TEC")
+        access_token = os.getenv("SHOPIFY_API_TOKEN")
+    print(f"SHOP_NAME = {shop_name!r}")  # <-- DEBUG
+    if not shop_name or not access_token:
+        raise ValueError("Credentials Shopify manquants")
+    return {
+        "SHOP_NAME": shop_name,
+        "ACCESS_TOKEN": access_token,
+    }
