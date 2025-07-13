@@ -56,6 +56,9 @@ jobs:
           echo 'GCP_SERVICE_ACCOUNT = """' >> .streamlit/secrets.toml
           echo "${GCP_SERVICE_ACCOUNT}" >> .streamlit/secrets.toml
           echo '"""' >> .streamlit/secrets.toml
+          
+      - name: 🔍 DEBUG secrets injectés
+        run: cat .streamlit/secrets.toml
 
       - name: 🚀 Run refresh script
         run: python shopify_sdk/db/refresh_data.py
