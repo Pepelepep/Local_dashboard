@@ -19,27 +19,36 @@ def render():
     df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce")
     df["revenue"] = df["price"] * df["quantity"]
     df["date"] = df["created_at"].dt.date
-    # Ordre désiré
+
+    # --- Créer le jour de la semaine avec l'ordre voulu
     days_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    day_type = CategoricalDtype(categories=days_order, ordered=True)
-    
-    # Appliquer
-    df["day_of_week"] = df["created_at"].dt.day_name().astype(day_type)
+    cat_type = CategoricalDtype(categories=days_order, ordered=True)
+    df["day_of_week"] = df["created_at"].dt.day_name().astype(cat_type)
 
     # --- Localisation horaire (Montréal)
     mtl_tz = pytz.timezone("America/Toronto")
     df["created_at"] = df["created_at"].dt.tz_convert(mtl_tz)
     df["hour"] = df["created_at"].dt.hour
-    df["weekday"] = df["created_at"].dt.day_name()
 
+    # --- Filtre par lieu
+    locations = df["location_name"].dropna().unique().tolist()
+    locations.sort()
+    locations.insert(0, "Tous")  # Ajoute "Tous" en premier
+        
     # --- Filtres de période
-    st.subheader("📅 Sélectionne une période")
-    col1, col2 = st.columns(2)
+    st.subheader("📅 Sélectionne une boutique et la période")
+    col1, col2, col3 = st.columns(3)
     min_date = df["date"].min()
     max_date = df["date"].max()
     with col1:
-        start_date = st.date_input("Date de début", min_value=min_date, max_value=max_date, value=min_date)
+        selected_location = st.selectbox("📍 Point de vente :", options=locations)
+
+        # Applique le filtre uniquement si un lieu spécifique est choisi
+        if selected_location != "Tous":
+            df = df[df["location_name"] == selected_location]
     with col2:
+        start_date = st.date_input("Date de début", min_value=min_date, max_value=max_date, value=min_date)
+    with col3:
         end_date = st.date_input("Date de fin", min_value=min_date, max_value=max_date, value=max_date)
 
     if start_date > end_date:
@@ -73,52 +82,9 @@ def render():
     )
     st.altair_chart(alt.layer(bar, line).resolve_scale(y="independent"), use_container_width=True)
 
-    # # --- Ventes moyennes par heure
-    # hourly_stats = (
-    #     filtered_df.groupby(["date", "hour"])["order_id"]
-    #     .nunique()
-    #     .reset_index()
-    #     .groupby("hour")["order_id"]
-    #     .mean()
-    #     .reset_index()
-    #     .rename(columns={"order_id": "avg_orders"})
-    # )
-    # st.subheader("⏱️ Volume moyen de ventes par heure")
-    # st.altair_chart(
-    #     alt.Chart(hourly_stats).mark_bar().encode(
-    #         x=alt.X("hour:O", title="Heure"),
-    #         y=alt.Y("avg_orders:Q", title="Commandes Moyennes"),
-    #         tooltip=["hour", "avg_orders"]
-    #     ).properties(width=700, height=300),
-    #     use_container_width=True
-    # )
-    # 
-    # # --- Ventes moyennes par jour de la semaine
-    # weekday_stats = (
-    #     filtered_df.groupby(["date", "weekday"])["order_id"]
-    #     .nunique()
-    #     .reset_index()
-    #     .groupby("weekday")["order_id"]
-    #     .mean()
-    #     .reindex([
-    #         "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-    #     ])
-    #     .reset_index()
-    #     .rename(columns={"order_id": "avg_orders"})
-    # )
-    # st.subheader("📆 Volume moyen de ventes par jour de la semaine")
-    # st.altair_chart(
-    #     alt.Chart(weekday_stats).mark_bar().encode(
-    #         x=alt.X("weekday:N", title="Jour"),
-    #         y=alt.Y("avg_orders:Q", title="Commandes Moyennes"),
-    #         tooltip=["weekday", "avg_orders"]
-    #     ).properties(width=700, height=300),
-    #     use_container_width=True
-    # )
-    
     # Aggrégation
     heatmap_data = (
-        filtered_df.groupby(["day_of_week", "hour"])
+        filtered_df.groupby(["day_of_week", "hour"], observed=True)
         .agg(avg_sales=("order_id", "nunique"))
         .reset_index()
     )
@@ -126,7 +92,7 @@ def render():
     # Heatmap
     heatmap = alt.Chart(heatmap_data).mark_rect().encode(
         x=alt.X("hour:O", title="Heure (0-23)"),
-        y=alt.Y("day_of_week:N", title="Jour de la semaine"),
+        y=alt.Y("day_of_week:N", title="Jour de la semaine", sort=days_order),
         color=alt.Color("avg_sales:Q", scale=alt.Scale(scheme='blues'), title="Nb ventes moyennes"),
         tooltip=["day_of_week", "hour", "avg_sales"]
     ).properties(
@@ -136,7 +102,6 @@ def render():
     )
     
     st.altair_chart(heatmap, use_container_width=True)
-    
     
     # --- Top produits
     st.subheader("🏆 Top 10 des produits les plus vendus")
