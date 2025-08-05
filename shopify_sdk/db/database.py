@@ -11,11 +11,11 @@ def get_db_config():
     try:
         import streamlit as st
         secrets = st.secrets
-        config["user"] = secrets.get("user", None)
-        config["password"] = secrets.get("password", None)
-        config["host"] = secrets.get("host", None)
-        config["port"] = secrets.get("port", 5432)
-        config["database"] = secrets.get("database", None)
+        config["user"] = secrets.get("USER", None) or secrets.get("user", None)
+        config["password"] = secrets.get("PASSWORD", None) or secrets.get("password", None)
+        config["host"] = secrets.get("HOST", None) or secrets.get("host", None)
+        config["port"] = secrets.get("PORT", None) or secrets.get("port", 5432)
+        config["database"] = secrets.get("DATABASE", None) or  secrets.get("database", None)
     except (ModuleNotFoundError, AttributeError):
         # 2️⃣ Sinon variables d'environnement
         config["user"] = os.getenv("USER") or os.getenv("user")
