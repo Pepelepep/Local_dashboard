@@ -10,6 +10,7 @@ query getProductsAndVariants($cursor: String) {
         title
         vendor
         productType
+        createdAt
         updatedAt
         variants(first: 100) {
           edges {

@@ -26,6 +26,7 @@ def fetch_products_variants_df(config):
         for edge in products["edges"]:
             cursor = edge["cursor"]
             product = edge["node"]
+
             for v_edge in product["variants"]["edges"]:
                 variant = v_edge["node"]
 
@@ -39,6 +40,7 @@ def fetch_products_variants_df(config):
                     "product_title": product["title"],
                     "product_type": product.get("productType"),
                     "vendor": product.get("vendor"),
+                    "product_created_at": product.get("createdAt"),   # <-- AJOUTÉ
                     "product_updated_at": product.get("updatedAt"),
                     "variant_id": variant["id"],
                     "variant_title": variant.get("title"),
@@ -50,4 +52,12 @@ def fetch_products_variants_df(config):
 
         has_next = products["pageInfo"]["hasNextPage"]
 
-    return pd.DataFrame(rows)
+    df = pd.DataFrame(rows)
+    # parsage utile pour la suite
+    if "product_created_at" in df.columns:
+        df["product_created_at"] = pd.to_datetime(df["product_created_at"], errors="coerce")
+    if "product_updated_at" in df.columns:
+        df["product_updated_at"] = pd.to_datetime(df["product_updated_at"], errors="coerce")
+    if "variant_updated_at" in df.columns:
+        df["variant_updated_at"] = pd.to_datetime(df["variant_updated_at"], errors="coerce")
+    return df
