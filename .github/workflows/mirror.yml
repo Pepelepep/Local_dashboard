@@ -1,30 +1,36 @@
 name: Mirror to Repo B
 on:
   push:
-    branches: [ main ]   # change si ta branche prod est différente
-    tags:
-      - '*'              # mirror aussi les tags
+    branches: [ main ]     # adapte si besoin
+    tags: ['*']
   workflow_dispatch:
 
 jobs:
   mirror:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # nécessaire pour pousser tout l’historique + tags
+          fetch-depth: 0
+          persist-credentials: false   # <— NE PAS garder les creds du bot
 
       - name: Set git identity
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
-      - name: Add mirror remote
+      - name: Build authenticated mirror URL
+        id: url
+        shell: bash
         run: |
-          # Injecte le token dans l'URL du dépôt B
           MIRROR="${{ secrets.MIRROR_REMOTE }}"
-          MIRROR_AUTH="${MIRROR/https:\/\//https:\/\/${{ secrets.MIRROR_TOKEN }}@}"
-          git remote add mirror "$MIRROR_AUTH"
+          # injecte le PAT dans l’URL HTTPS
+          AUTH_URL="${MIRROR/https:\/\//https:\/\/${{ secrets.MIRROR_TOKEN }}@}"
+          echo "auth=${AUTH_URL}" >> $GITHUB_OUTPUT
+
+      - name: Add mirror remote
+        run: git remote add mirror "${{ steps.url.outputs.auth }}"
 
       - name: Push all branches
         run: git push mirror --all
