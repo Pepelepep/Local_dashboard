@@ -14,8 +14,8 @@ jobs:
       cancel-in-progress: false
 
     env:
-      SHOP_NAME: ${{ secrets.SHOP_NAME }}
-      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      SHOP_NAME: ${{ secrets.SHOP_NAME_TEC }}
+      ACCESS_TOKEN: ${{ secrets.SHOPIFY_API_TOKEN }}
       # ajoute ici d'autres vars si ton code en a besoin
 
     steps:
