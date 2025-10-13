@@ -25,42 +25,28 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"   # aligne avec ta version locale (3.9/3.11)
+          python-version: "3.11"
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install deps
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          # fallback minimal si pas de requirements
-          python - <<'PY'
-import importlib, subprocess, sys
-for pkg in ("gql","requests"):
-    try:
-        importlib.import_module(pkg)
-    except ImportError:
-        subprocess.check_call([sys.executable,"-m","pip","install",pkg])
-PY
 
-      - name: Run SKU updater
-        run: |
-          python -m shopify_sdk.mutations.sku
-        # si ton entrypoint n'est pas en module, alors:
-        # run: python shopify_sdk/mutations/sku.py
+      # ----- Option A : exécuter en module (recommandé si 'shopify_sdk' est un package) -----
+      - name: Run SKU updater (module)
+        if: ${{ always() }}
+        run: python -m shopify_sdk.mutations.sku
 
-      - name: Upload logs (toujours visible)
+      # ----- Option B : exécuter le fichier directement (décommente si A échoue) -----
+      # - name: Run SKU updater (script)
+      #   run: python shopify_sdk/mutations/sku.py
+
+      - name: Upload logs (si présents)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: sku-update-logs
           path: |
             **/*.log
-            **/logs/**
+            logs/**
           if-no-files-found: ignore
