@@ -1,0 +1,66 @@
+name: Weekly SKU Update
+
+on:
+  workflow_dispatch: {}            # déclenchement manuel
+  schedule:
+    - cron: "0 2 * * 1"            # tous les lundis 02:00 UTC (modifier si besoin)
+
+jobs:
+  run-sku-update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: update-sku
+      cancel-in-progress: false
+
+    env:
+      SHOP_NAME: ${{ secrets.SHOP_NAME }}
+      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      # ajoute ici d'autres vars si ton code en a besoin
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"   # aligne avec ta version locale (3.9/3.11)
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # fallback minimal si pas de requirements
+          python - <<'PY'
+import importlib, subprocess, sys
+for pkg in ("gql","requests"):
+    try:
+        importlib.import_module(pkg)
+    except ImportError:
+        subprocess.check_call([sys.executable,"-m","pip","install",pkg])
+PY
+
+      - name: Run SKU updater
+        run: |
+          python -m shopify_sdk.mutations.sku
+        # si ton entrypoint n'est pas en module, alors:
+        # run: python shopify_sdk/mutations/sku.py
+
+      - name: Upload logs (toujours visible)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sku-update-logs
+          path: |
+            **/*.log
+            **/logs/**
+          if-no-files-found: ignore
